@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>叮当团队报价系统</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --light-color: #f5f5f5;
+            --dark-color: #333;
+            --success-color: #2ecc71;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .section-title {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 20px 0 15px;
+            font-size: 1.2rem;
+        }
+        
+        .item-group {
+            background-color: var(--light-color);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -5px;
+        }
+        
+        .col {
+            flex: 1;
+            padding: 0 5px;
+            min-width: 120px;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-add {
+            background-color: var(--success-color);
+            margin-top: 10px;
+        }
+        
+        .btn-add:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-remove {
+            background-color: var(--accent-color);
+            padding: 5px 10px;
+            font-size: 14px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .btn-remove:hover {
+            background-color: #c0392b;
+        }
+        
+        .summary {
+            background-color: var(--light-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .action-buttons .btn {
+            flex: 1;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .cost-details {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .cost-details h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .detail-item {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dotted #ddd;
+        }
+        
+        .detail-item small {
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            .col {
+                flex: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>叮当团队报价系统</h1>
+        
+        <div class="form-group">
+            <label for="travel-date">出行日期</label>
+            <input type="date" id="travel-date" required>
+            
+            <label for="duration">行程天数</label>
+            <div class="row">
+                <div class="col">
+                    <input type="number" id="days" placeholder="天数" min="1" required>
+                </div>
+                <div class="col">
+                    <input type="number" id="nights" placeholder="晚数" min="1" required>
+                </div>
+            </div>
+            
+            <label for="people-count">人数</label>
+            <input type="number" id="people-count" placeholder="请输入人数" min="1" required>
+        </div>
+        
+        <div class="section-title">1. 车费</div>
+        <div class="form-group" id="vehicle-section">
+            <div class="row">
+                <div class="col">
+                    <input type="number" id="vehicle-price" placeholder="价格（元/团）" min="0">
+                </div>
+                <div class="col">
+                    <input type="number" id="vehicle-seats" placeholder="几座车" min="1">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="text" id="vehicle-brand" placeholder="车辆品牌">
+                </div>
+                <div class="col">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="pickup-service">
+                        <label for="pickup-service">含接送机</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-title">2. 住宿</div>
+        <div class="form-group" id="accommodation-section">
+            <div id="accommodation-items">
+                <div class="item-group accommodation-item">
+                    <button type="button" class="btn btn-remove remove-accommodation">×</button>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="hotel-name" placeholder="酒店名称">
+                        </div>
+                        <div class="col">
+                            <select class="room-type">
+                                <option value="">选择房型</option>
+                                <option value="标间">标间</option>
+                                <option value="大床房">大床房</option>
+                                <option value="亲子房">亲子房</option>
+                                <option value="套房">套房</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <input type="number" class="accommodation-nights" placeholder="几晚" min="1">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="rooms-per-night" placeholder="每晚几间" min="1">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <input type="number" class="accommodation-price" placeholder="每晚价格" min="0">
+                        </div>
+                        <div class="col">
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="breakfast-included">
+                                <label>含早餐</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-add" id="add-accommodation">+ 添加住宿</button>
+        </div>
+        
+        <div class="section-title">3. 门票</div>
+        <div class="form-group" id="ticket-section">
+            <div id="ticket-items">
+                <div class="item-group ticket-item">
+                    <button type="button" class="btn btn-remove remove-ticket">×</button>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="ticket-name" placeholder="门票项目">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="ticket-price" placeholder="每人价格" min="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-add" id="add-ticket">+ 添加门票</button>
+        </div>
+        
+        <div class="section-title">4. 餐费</div>
+        <div class="form-group" id="meal-section">
+            <div id="meal-items">
+                <div class="item-group meal-item">
+                    <button type="button" class="btn btn-remove remove-meal">×</button>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="meal-name" placeholder="餐饮项目">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="meal-price" placeholder="每人价格" min="0">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="meal-count" placeholder="几餐" min="1" value="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-add" id="add-meal">+ 添加餐饮</button>
+        </div>
+        
+        <div class="section-title">5. 保险及其他杂费</div>
+        <div class="form-group">
+            <input type="number" id="insurance-price" placeholder="每人价格" min="0" value="100">
+        </div>
+        
+        <div class="section-title">6. 其他自定义项目</div>
+        <div class="form-group" id="custom-section">
+            <div id="custom-items">
+                <div class="item-group custom-item">
+                    <button type="button" class="btn btn-remove remove-custom">×</button>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="custom-name" placeholder="项目名称">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="custom-price" placeholder="价格" min="0">
+                        </div>
+                        <div class="col">
+                            <select class="custom-type">
+                                <option value="fixed">固定费用</option>
+                                <option value="per-person">每人费用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-add" id="add-custom">+ 添加自定义项目</button>
+        </div>
+        
+        <div class="summary">
+            <h2>费用总计</h2>
+            <div class="summary-item">
+                <span>车费:</span>
+                <span id="vehicle-total">0元</span>
+            </div>
+            <div class="summary-item">
+                <span>住宿费:</span>
+                <span id="accommodation-total">0元</span>
+            </div>
+            <div class="summary-item">
+                <span>门票费:</span>
+                <span id="ticket-total">0元</span>
+            </div>
+            <div class="summary-item">
+                <span>餐费:</span>
+                <span id="meal-total">0元</span>
+            </div>
+            <div class="summary-item">
+                <span>保险及其他杂费:</span>
+                <span id="insurance-total">0元</span>
+            </div>
+            <div class="summary-item">
+                <span>其他费用:</span>
+                <span id="custom-total">0元</span>
+            </div>
+            <div class="total" id="total-cost">总计: 0元</div>
+            <div class="total" id="per-person-cost">人均: 0元</div>
+            
+            <div class="action-buttons">
+                <button type="button" class="btn" id="copy-summary">一键复制报价</button>
+                <button type="button" class="btn" id="copy-details">一键复制详细报价</button>
+            </div>
+            
+            <!-- 费用明细区域 -->
+            <div class="cost-details">
+                <h3>费用明细</h3>
+                <div id="cost-details-content">
+                    <p>请填写上方表单以生成费用明细</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置默认日期为明天
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('travel-date').valueAsDate = tomorrow;
+            
+            // 添加住宿项目
+            document.getElementById('add-accommodation').addEventListener('click', function() {
+                addAccommodationItem();
+            });
+            
+            // 添加门票项目
+            document.getElementById('add-ticket').addEventListener('click', function() {
+                addTicketItem();
+            });
+            
+            // 添加餐饮项目
+            document.getElementById('add-meal').addEventListener('click', function() {
+                addMealItem();
+            });
+            
+            // 添加自定义项目
+            document.getElementById('add-custom').addEventListener('click', function() {
+                addCustomItem();
+            });
+            
+            // 初始添加一个住宿、门票、餐饮项目，但只保留一个自定义项目
+            addAccommodationItem();
+            addTicketItem();
+            addMealItem();
+            
+            // 计算总费用
+            document.addEventListener('input', calculateTotal);
+            document.addEventListener('change', calculateTotal);
+            
+            // 复制报价
+            document.getElementById('copy-summary').addEventListener('click', copySummary);
+            document.getElementById('copy-details').addEventListener('click', copyDetails);
+            
+            // 添加住宿项目函数
+            function addAccommodationItem() {
+                const container = document.getElementById('accommodation-items');
+                const newItem = document.createElement('div');
+                newItem.className = 'item-group accommodation-item';
+                newItem.innerHTML = `
+                    <button type="button" class="btn btn-remove remove-accommodation">×</button>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="hotel-name" placeholder="酒店名称">
+                        </div>
+                        <div class="col">
+                            <select class="room-type">
+                                <option value="">选择房型</option>
+                                <option value="标间">标间</option>
+                                <option value="大床房">大床房</option>
+                                <option value="亲子房">亲子房</option>
+                                <option value="套房">套房</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <input type="number" class="accommodation-nights" placeholder="几晚" min="1">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="rooms-per-night" placeholder="每晚几间" min="1">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <input type="number" class="accommodation-price" placeholder="每晚价格" min="0">
+                        </div>
+                        <div class="col">
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="breakfast-included">
+                                <label>含早餐</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newItem);
+                
+                // 添加删除事件
+                newItem.querySelector('.remove-accommodation').addEventListener('click', function() {
+                    if (document.querySelectorAll('.accommodation-item').length > 1) {
+                        newItem.remove();
+                        calculateTotal();
+                    } else {
+                        alert('至少需要保留一个住宿项目');
+                    }
+                });
+            }
+            
+            // 添加门票项目函数
+            function addTicketItem() {
+                const container = document.getElementById('ticket-items');
+                const newItem = document.createElement('div');
+                newItem.className = 'item-group ticket-item';
+                newItem.innerHTML = `
+                    <button type="button" class="btn btn-remove remove-ticket">×</button>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="ticket-name" placeholder="门票项目">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="ticket-price" placeholder="每人价格" min="0">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newItem);
+                
+                // 添加删除事件
+                newItem.querySelector('.remove-ticket').addEventListener('click', function() {
+                    if (document.querySelectorAll('.ticket-item').length > 1) {
+                        newItem.remove();
+                        calculateTotal();
+                    } else {
+                        alert('至少需要保留一个门票项目');
+                    }
+                });
+            }
+            
+            // 添加餐饮项目函数
+            function addMealItem() {
+                const container = document.getElementById('meal-items');
+                const newItem = document.createElement('div');
+                newItem.className = 'item-group meal-item';
+                newItem.innerHTML = `
+                    <button type="button" class="btn btn-remove remove-meal">×</button>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="meal-name" placeholder="餐饮项目">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="meal-price" placeholder="每人价格" min="0">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="meal-count" placeholder="几餐" min="1" value="1">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newItem);
+                
+                // 添加删除事件
+                newItem.querySelector('.remove-meal').addEventListener('click', function() {
+                    if (document.querySelectorAll('.meal-item').length > 1) {
+                        newItem.remove();
+                        calculateTotal();
+                    } else {
+                        alert('至少需要保留一个餐饮项目');
+                    }
+                });
+            }
+            
+            // 添加自定义项目函数
+            function addCustomItem() {
+                const container = document.getElementById('custom-items');
+                const newItem = document.createElement('div');
+                newItem.className = 'item-group custom-item';
+                newItem.innerHTML = `
+                    <button type="button" class="btn btn-remove remove-custom">×</button>
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="custom-name" placeholder="项目名称">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="custom-price" placeholder="价格" min="0">
+                        </div>
+                        <div class="col">
+                            <select class="custom-type">
+                                <option value="fixed">固定费用</option>
+                                <option value="per-person">每人费用</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newItem);
+                
+                // 添加删除事件
+                newItem.querySelector('.remove-custom').addEventListener('click', function() {
+                    if (document.querySelectorAll('.custom-item').length > 1) {
+                        newItem.remove();
+                        calculateTotal();
+                    } else {
+                        alert('至少需要保留一个自定义项目');
+                    }
+                });
+            }
+            
+            // 计算总费用函数
+            function calculateTotal() {
+                const peopleCount = parseInt(document.getElementById('people-count').value) || 0;
+                
+                // 车费
+                const vehiclePrice = parseFloat(document.getElementById('vehicle-price').value) || 0;
+                document.getElementById('vehicle-total').textContent = vehiclePrice.toLocaleString() + '元';
+                
+                // 住宿费
+                let accommodationTotal = 0;
+                let accommodationDetails = [];
+                document.querySelectorAll('.accommodation-item').forEach(item => {
+                    const hotelName = item.querySelector('.hotel-name').value;
+                    const roomType = item.querySelector('.room-type').value;
+                    const nights = parseInt(item.querySelector('.accommodation-nights').value) || 0;
+                    const rooms = parseInt(item.querySelector('.rooms-per-night').value) || 0;
+                    const price = parseFloat(item.querySelector('.accommodation-price').value) || 0;
+                    const breakfast = item.querySelector('.breakfast-included').checked ? '含早餐' : '不含早餐';
+                    const itemTotal = nights * rooms * price;
+                    
+                    if (hotelName && roomType && nights > 0 && rooms > 0 && price > 0) {
+                        accommodationTotal += itemTotal;
+                        accommodationDetails.push({
+                            name: hotelName,
+                            roomType: roomType,
+                            nights: nights,
+                            rooms: rooms,
+                            price: price,
+                            breakfast: breakfast,
+                            total: itemTotal
+                        });
+                    }
+                });
+                document.getElementById('accommodation-total').textContent = accommodationTotal.toLocaleString() + '元';
+                
+                // 门票费
+                let ticketTotal = 0;
+                let ticketDetails = [];
+                document.querySelectorAll('.ticket-item').forEach(item => {
+                    const ticketName = item.querySelector('.ticket-name').value;
+                    const ticketPrice = parseFloat(item.querySelector('.ticket-price').value) || 0;
+                    const itemTotal = ticketPrice * peopleCount;
+                    
+                    if (ticketName && ticketPrice > 0) {
+                        ticketTotal += itemTotal;
+                        ticketDetails.push({
+                            name: ticketName,
+                            price: ticketPrice,
+                            total: itemTotal
+                        });
+                    }
+                });
+                document.getElementById('ticket-total').textContent = ticketTotal.toLocaleString() + '元';
+                
+                // 餐费
+                let mealTotal = 0;
+                let mealDetails = [];
+                document.querySelectorAll('.meal-item').forEach(item => {
+                    const mealName = item.querySelector('.meal-name').value;
+                    const mealPrice = parseFloat(item.querySelector('.meal-price').value) || 0;
+                    const mealCount = parseInt(item.querySelector('.meal-count').value) || 1;
+                    const itemTotal = mealPrice * peopleCount * mealCount;
+                    
+                    if (mealName && mealPrice > 0) {
+                        mealTotal += itemTotal;
+                        mealDetails.push({
+                            name: mealName,
+                            price: mealPrice,
+                            count: mealCount,
+                            total: itemTotal
+                        });
+                    }
+                });
+                document.getElementById('meal-total').textContent = mealTotal.toLocaleString() + '元';
+                
+                // 保险及其他杂费
+                const insurancePrice = parseFloat(document.getElementById('insurance-price').value) || 0;
+                const insuranceTotal = insurancePrice * peopleCount;
+                document.getElementById('insurance-total').textContent = insuranceTotal.toLocaleString() + '元';
+                
+                // 其他费用
+                let customTotal = 0;
+                let customDetails = [];
+                document.querySelectorAll('.custom-item').forEach(item => {
+                    const customName = item.querySelector('.custom-name').value;
+                    const customPrice = parseFloat(item.querySelector('.custom-price').value) || 0;
+                    const customType = item.querySelector('.custom-type').value;
+                    const itemTotal = customType === 'per-person' ? customPrice * peopleCount : customPrice;
+                    
+                    if (customName && customPrice > 0) {
+                        customTotal += itemTotal;
+                        customDetails.push({
+                            name: customName,
+                            price: customPrice,
+                            type: customType,
+                            total: itemTotal
+                        });
+                    }
+                });
+                document.getElementById('custom-total').textContent = customTotal.toLocaleString() + '元';
+                
+                // 总计
+                const total = vehiclePrice + accommodationTotal + ticketTotal + mealTotal + insuranceTotal + customTotal;
+                document.getElementById('total-cost').textContent = '总计: ' + total.toLocaleString() + '元';
+                
+                // 人均费用
+                const perPerson = peopleCount > 0 ? total / peopleCount : 0;
+                document.getElementById('per-person-cost').textContent = '人均: ' + (perPerson > 0 ? perPerson.toFixed(0) : 0) + '元';
+                
+                // 更新费用明细
+                updateCostDetails(
+                    vehiclePrice,
+                    accommodationTotal,
+                    accommodationDetails,
+                    ticketTotal,
+                    ticketDetails,
+                    mealTotal,
+                    mealDetails,
+                    insuranceTotal,
+                    customTotal,
+                    customDetails,
+                    total,
+                    perPerson,
+                    peopleCount
+                );
+            }
+            
+            // 更新费用明细函数
+            function updateCostDetails(
+                vehiclePrice, 
+                accommodationTotal, 
+                accommodationDetails, 
+                ticketTotal, 
+                ticketDetails, 
+                mealTotal, 
+                mealDetails, 
+                insuranceTotal, 
+                customTotal, 
+                customDetails, 
+                total, 
+                perPerson,
+                peopleCount
+            ) {
+                const detailsContainer = document.getElementById('cost-details-content');
+                let detailsHTML = '';
+                
+                if (total === 0) {
+                    detailsHTML = '<p>请填写上方表单以生成费用明细</p>';
+                } else {
+                    // 车费明细
+                    if (vehiclePrice > 0) {
+                        const vehicleSeats = document.getElementById('vehicle-seats').value || 0;
+                        const vehicleBrand = document.getElementById('vehicle-brand').value || '';
+                        const pickupService = document.getElementById('pickup-service').checked ? '含接送机' : '';
+                        const days = document.getElementById('days').value || 0;
+                        
+                        detailsHTML += `<div class="detail-item">
+                            <strong>车费:</strong> ${vehiclePrice.toLocaleString()}元<br>
+                            <small>${vehicleSeats}座${vehicleBrand}${days}天用车${pickupService}</small>
+                        </div>`;
+                    }
+                    
+                    // 住宿费明细
+                    if (accommodationTotal > 0) {
+                        detailsHTML += `<div class="detail-item">
+                            <strong>住宿费:</strong> ${accommodationTotal.toLocaleString()}元<br>
+                            <small>`;
+                        
+                        accommodationDetails.forEach(accommodation => {
+                            detailsHTML += `&nbsp;&nbsp;${accommodation.name}（${accommodation.roomType}）×${accommodation.nights}晚，每晚${accommodation.rooms}间<br>
+                            &nbsp;&nbsp;房费：${accommodation.price}元/晚×${accommodation.nights}晚×${accommodation.rooms}间 = ${accommodation.total.toLocaleString()}元 酒店${accommodation.breakfast}<br>`;
+                        });
+                        
+                        detailsHTML += `</small></div>`;
+                    }
+                    
+                    // 门票费明细
+                    if (ticketTotal > 0) {
+                        detailsHTML += `<div class="detail-item">
+                            <strong>门票费:</strong> ${ticketTotal.toLocaleString()}元<br>
+                            <small>`;
+                        
+                        ticketDetails.forEach(ticket => {
+                            detailsHTML += `&nbsp;&nbsp;${ticket.name}: ${ticket.price}元/人 × ${peopleCount}人 = ${ticket.total.toLocaleString()}元<br>`;
+                        });
+                        
+                        detailsHTML += `</small></div>`;
+                    }
+                    
+                    // 餐费明细
+                    if (mealTotal > 0) {
+                        detailsHTML += `<div class="detail-item">
+                            <strong>餐费:</strong> ${mealTotal.toLocaleString()}元<br>
+                            <small>`;
+                        
+                        mealDetails.forEach(meal => {
+                            detailsHTML += `&nbsp;&nbsp;${meal.name}: ${meal.price}元/人 × ${peopleCount}人 × ${meal.count}餐 = ${meal.total.toLocaleString()}元<br>`;
+                        });
+                        
+                        detailsHTML += `</small></div>`;
+                    }
+                    
+                    // 保险及其他杂费明细
+                    if (insuranceTotal > 0) {
+                        const insurancePrice = parseFloat(document.getElementById('insurance-price').value) || 0;
+                        detailsHTML += `<div class="detail-item">
+                            <strong>保险及其他杂费:</strong> ${insuranceTotal.toLocaleString()}元<br>
+                            <small>${insurancePrice}元/人 × ${peopleCount}人 = ${insuranceTotal.toLocaleString()}元</small>
+                        </div>`;
+                    }
+                    
+                    // 其他费用明细
+                    if (customTotal > 0) {
+                        detailsHTML += `<div class="detail-item">
+                            <strong>其他费用:</strong> ${customTotal.toLocaleString()}元<br>
+                            <small>`;
+                        
+                        customDetails.forEach(custom => {
+                            if (custom.type === 'per-person') {
+                                detailsHTML += `&nbsp;&nbsp;${custom.name}: ${custom.price}元/人 × ${peopleCount}人 = ${custom.total.toLocaleString()}元<br>`;
+                            } else {
+                                detailsHTML += `&nbsp;&nbsp;${custom.name}: ${custom.price.toLocaleString()}元<br>`;
+                            }
+                        });
+                        
+                        detailsHTML += `</small></div>`;
+                    }
+                    
+                    // 总计和人均
+                    detailsHTML += `<div class="detail-item">
+                        <strong>总计:</strong> ${total.toLocaleString()}元
+                    </div>
+                    <div class="detail-item">
+                        <strong>人均:</strong> ${perPerson.toFixed(0)}元
+                    </div>`;
+                }
+                
+                detailsContainer.innerHTML = detailsHTML;
+            }
+            
+            // 复制简要报价
+            function copySummary() {
+                const travelDate = document.getElementById('travel-date').value;
+                const peopleCount = document.getElementById('people-count').value || 0;
+                const totalCost = document.getElementById('total-cost').textContent.replace('总计: ', '');
+                const perPersonCost = document.getElementById('per-person-cost').textContent.replace('人均: ', '');
+                
+                const dateObj = new Date(travelDate);
+                const formattedDate = `${dateObj.getMonth() + 1}.${dateObj.getDate()}`;
+                
+                const summaryText = `${formattedDate} ${peopleCount}人 结算合计：${totalCost} 人均结算：${perPersonCost}`;
+                
+                copyToClipboard(summaryText);
+                alert('简要报价已复制到剪贴板');
+            }
+            
+            // 复制详细报价
+            function copyDetails() {
+                const travelDate = document.getElementById('travel-date').value;
+                const peopleCount = document.getElementById('people-count').value || 0;
+                const days = document.getElementById('days').value || 0;
+                const nights = document.getElementById('nights').value || 0;
+                
+                const dateObj = new Date(travelDate);
+                const formattedDate = `${dateObj.getMonth() + 1}.${dateObj.getDate()}`;
+                
+                let detailsText = `${formattedDate} ${peopleCount}人 ${days}天${nights}晚\n结算合计：${document.getElementById('total-cost').textContent.replace('总计: ', '')}\n人均结算：${document.getElementById('per-person-cost').textContent.replace('人均: ', '')}\n\n`;
+                
+                // 车费
+                const vehiclePrice = parseFloat(document.getElementById('vehicle-price').value) || 0;
+                const vehicleSeats = document.getElementById('vehicle-seats').value || 0;
+                const vehicleBrand = document.getElementById('vehicle-brand').value || '';
+                const pickupService = document.getElementById('pickup-service').checked ? '含接送机' : '';
+                
+                if (vehiclePrice > 0) {
+                    detailsText += `1、车费：${vehiclePrice}元（${vehicleSeats}座${vehicleBrand}${days}天用车${pickupService}）\n`;
+                }
+                
+                // 住宿
+                detailsText += `2、住宿：\n`;
+                document.querySelectorAll('.accommodation-item').forEach((item, index) => {
+                    const hotelName = item.querySelector('.hotel-name').value || '';
+                    const roomType = item.querySelector('.room-type').value || '';
+                    const nights = item.querySelector('.accommodation-nights').value || 0;
+                    const rooms = item.querySelector('.rooms-per-night').value || 0;
+                    const price = item.querySelector('.accommodation-price').value || 0;
+                    const breakfast = item.querySelector('.breakfast-included').checked ? '含早餐' : '不含早餐';
+                    
+                    if (hotelName && roomType && nights > 0 && rooms > 0 && price > 0) {
+                        const total = nights * rooms * price;
+                        detailsText += `${hotelName}（${roomType}）×${nights}晚，每晚${rooms}间\n房费：${price}*${nights}*${rooms} = ${total}元 酒店${breakfast}\n`;
+                    }
+                });
+                
+                // 门票
+                let ticketTotal = 0;
+                let ticketDetails = '';
+                document.querySelectorAll('.ticket-item').forEach(item => {
+                    const ticketName = item.querySelector('.ticket-name').value || '';
+                    const ticketPrice = parseFloat(item.querySelector('.ticket-price').value) || 0;
+                    
+                    if (ticketName && ticketPrice > 0) {
+                        const itemTotal = ticketPrice * peopleCount;
+                        ticketTotal += itemTotal;
+                        ticketDetails += `${ticketName} ${ticketPrice}元/人 × ${peopleCount}人 = ${itemTotal}元\n`;
+                    }
+                });
+                
+                if (ticketTotal > 0) {
+                    detailsText += `3、门票：${(ticketTotal / peopleCount).toFixed(0)}元/人 ${ticketTotal}元\n`;
+                    detailsText += `门票包含：\n${ticketDetails}`;
+                }
+                
+                // 餐费
+                let mealTotal = 0;
+                let mealDetails = '';
+                document.querySelectorAll('.meal-item').forEach(item => {
+                    const mealName = item.querySelector('.meal-name').value || '';
+                    const mealPrice = parseFloat(item.querySelector('.meal-price').value) || 0;
+                    const mealCount = parseInt(item.querySelector('.meal-count').value) || 1;
+                    
+                    if (mealName && mealPrice > 0) {
+                        const itemTotal = mealPrice * peopleCount * mealCount;
+                        mealTotal += itemTotal;
+                        mealDetails += `${mealName} ${mealPrice}元/人 × ${peopleCount}人 × ${mealCount}餐 = ${itemTotal}元\n`;
+                    }
+                });
+                
+                if (mealTotal > 0) {
+                    detailsText += `4、餐费：${mealTotal}元\n`;
+                    detailsText += `${mealDetails}`;
+                }
+                
+                // 保险及其他杂费
+                const insurancePrice = parseFloat(document.getElementById('insurance-price').value) || 0;
+                const insuranceTotal = insurancePrice * peopleCount;
+                
+                if (insuranceTotal > 0) {
+                    detailsText += `5、保险及其他杂费：${insurancePrice}元/人 × ${peopleCount}人 = ${insuranceTotal}元\n`;
+                }
+                
+                // 其他费用
+                let customTotal = 0;
+                document.querySelectorAll('.custom-item').forEach(item => {
+                    const customName = item.querySelector('.custom-name').value || '';
+                    const customPrice = parseFloat(item.querySelector('.custom-price').value) || 0;
+                    const customType = item.querySelector('.custom-type').value;
+                    
+                    if (customName && customPrice > 0) {
+                        const itemTotal = customType === 'per-person' ? customPrice * peopleCount : customPrice;
+                        customTotal += itemTotal;
+                        
+                        if (customType === 'per-person') {
+                            detailsText += `6、${customName}：${customPrice}元/人 × ${peopleCount}人 = ${itemTotal}元\n`;
+                        } else {
+                            detailsText += `6、${customName}：${customPrice}元\n`;
+                        }
+                    }
+                });
+                
+                copyToClipboard(detailsText);
+                alert('详细报价已复制到剪贴板');
+            }
+            
+            // 复制到剪贴板函数
+            function copyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+        });
+    </script>
+</body>
+</html>
