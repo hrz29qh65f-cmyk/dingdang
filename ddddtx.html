@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>叮当订单录入提醒系统</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
+    <style>
+        :root {
+            --primary-color: #4dabf7;
+            --success-color: #51cf66;
+            --warning-color: #ffa94d;
+            --danger-color: #ff6b6b;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --gray-color: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+        
+        .deploy-info {
+            background: #e7f5ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        .deploy-info h3 {
+            margin-bottom: 10px;
+            color: #1971c2;
+        }
+        
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .pending-card {
+            border-top: 5px solid var(--danger-color);
+        }
+        
+        .completed-card {
+            border-top: 5px solid var(--success-color);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .pending-card .stat-number {
+            color: var(--danger-color);
+        }
+        
+        .completed-card .stat-number {
+            color: var(--success-color);
+        }
+        
+        .add-order {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border 0.3s;
+        }
+        
+        textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.2);
+        }
+        
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button:hover {
+            background: #339af0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-complete {
+            background: var(--success-color);
+        }
+        
+        .btn-complete:hover {
+            background: #40c057;
+        }
+        
+        .btn-pending {
+            background: var(--warning-color);
+        }
+        
+        .btn-pending:hover {
+            background: #ff922b;
+        }
+        
+        .btn-delete {
+            background: var(--danger-color);
+        }
+        
+        .btn-delete:hover {
+            background: #fa5252;
+        }
+        
+        .btn-delete-all {
+            background: #e03131;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .btn-delete-all:hover {
+            background: #c92a2a;
+        }
+        
+        .order-list-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        
+        .order-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .order-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+        
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+        
+        .order-card.pending::before {
+            background: var(--danger-color);
+        }
+        
+        .order-card.completed::before {
+            background: var(--success-color);
+        }
+        
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .order-card.completed {
+            opacity: 0.85;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #ffe3e3;
+            color: var(--danger-color);
+        }
+        
+        .status-completed {
+            background: #d3f9d8;
+            color: #2b8a3e;
+        }
+        
+        .order-details {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+        
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .order-actions button {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .order-time {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 10px;
+            text-align: right;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+            grid-column: 1 / -1;
+        }
+        
+        .empty-state img {
+            max-width: 150px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .order-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .order-actions {
+                flex-direction: column;
+            }
+            
+            .order-list-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal h3 {
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            color: var(--gray-color);
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .modal-actions button {
+            padding: 10px 20px;
+        }
+        
+        .btn-cancel {
+            background: var(--gray-color);
+        }
+        
+        .btn-cancel:hover {
+            background: #5c636a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>叮当订单录入提醒系统</h1>
+            <p class="subtitle">专注订单详情，避免遗漏任何订单</p>
+            
+            <div class="deploy-info">
+                <h3>部署说明</h3>
+                <p>这是一个单文件Web应用，所有数据保存在您的浏览器本地存储中，不会上传到服务器。</p>
+            </div>
+        </header>
+        
+        <div class="dashboard">
+            <div class="stat-card pending-card">
+                <h3>待录订单</h3>
+                <div class="stat-number" id="pending-count">0</div>
+                <p>需要尽快处理的订单</p>
+            </div>
+            
+            <div class="stat-card completed-card">
+                <h3>已完成订单</h3>
+                <div class="stat-number" id="completed-count">0</div>
+                <p>已成功录入的订单</p>
+            </div>
+        </div>
+        
+        <div class="add-order">
+            <h2>添加新订单</h2>
+            <form id="order-form">
+                <div class="form-group">
+                    <label for="order-details">订单详情</label>
+                    <textarea id="order-details" placeholder="请输入订单详情..." required></textarea>
+                </div>
+                
+                <button type="submit">添加订单</button>
+            </form>
+        </div>
+        
+        <div class="order-list-container">
+            <div class="order-list-header">
+                <h2>订单列表</h2>
+                <button id="delete-all-btn" class="btn-delete-all">一键删除所有订单</button>
+            </div>
+            
+            <div class="order-list" id="order-list">
+                <div class="empty-state" id="empty-state">
+                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 12H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 12H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 16H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3>暂无订单</h3>
+                    <p>请添加您的第一个订单开始跟踪</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>订单录入系统 &copy; 2025 | 数据保存在您的浏览器本地存储中</p>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div class="modal" id="delete-modal">
+        <div class="modal-content">
+            <h3>确认删除所有订单</h3>
+            <p>您确定要删除所有订单吗？此操作无法撤销，所有订单数据将永久丢失。</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="cancel-delete">取消</button>
+                <button class="btn-delete" id="confirm-delete">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 订单数据存储
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        
+        // DOM元素
+        const orderForm = document.getElementById('order-form');
+        const orderList = document.getElementById('order-list');
+        const pendingCount = document.getElementById('pending-count');
+        const completedCount = document.getElementById('completed-count');
+        const emptyState = document.getElementById('empty-state');
+        const deleteAllBtn = document.getElementById('delete-all-btn');
+        const deleteModal = document.getElementById('delete-modal');
+        const cancelDeleteBtn = document.getElementById('cancel-delete');
+        const confirmDeleteBtn = document.getElementById('confirm-delete');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderOrders();
+            updateStats();
+            
+            // 表单提交事件
+            orderForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addOrder();
+            });
+            
+            // 一键删除按钮事件
+            deleteAllBtn.addEventListener('click', function() {
+                if (orders.length === 0) {
+                    showNotification('没有订单可删除');
+                    return;
+                }
+                deleteModal.style.display = 'flex';
+            });
+            
+            // 取消删除
+            cancelDeleteBtn.addEventListener('click', function() {
+                deleteModal.style.display = 'none';
+            });
+            
+            // 确认删除
+            confirmDeleteBtn.addEventListener('click', function() {
+                deleteAllOrders();
+                deleteModal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    deleteModal.style.display = 'none';
+                }
+            });
+        });
+        
+        // 添加新订单
+        function addOrder() {
+            const orderDetails = document.getElementById('order-details').value;
+            
+            const newOrder = {
+                id: Date.now().toString(),
+                details: orderDetails,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+            
+            orders.push(newOrder);
+            saveOrders();
+            renderOrders();
+            updateStats();
+            
+            // 重置表单
+            orderForm.reset();
+            
+            // 显示成功提示
+            showNotification('订单添加成功！');
+        }
+        
+        // 切换订单状态
+        function toggleOrderStatus(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = order.status === 'pending' ? 'completed' : 'pending';
+                saveOrders();
+                renderOrders();
+                updateStats();
+                
+                // 显示状态变更提示
+                const message = order.status === 'completed' ? '订单标记为已完成！' : '订单标记为待录入！';
+                showNotification(message);
+            }
+        }
+        
+        // 删除单个订单
+        function deleteOrder(orderId) {
+            if (confirm('确定要删除这个订单吗？')) {
+                orders = orders.filter(o => o.id !== orderId);
+                saveOrders();
+                renderOrders();
+                updateStats();
+                
+                // 显示删除提示
+                showNotification('订单已删除');
+            }
+        }
+        
+        // 删除所有订单
+        function deleteAllOrders() {
+            orders = [];
+            saveOrders();
+            renderOrders();
+            updateStats();
+            
+            // 显示删除提示
+            showNotification('所有订单已删除');
+        }
+        
+        // 渲染订单列表
+        function renderOrders() {
+            if (orders.length === 0) {
+                emptyState.style.display = 'block';
+                orderList.innerHTML = '';
+                orderList.appendChild(emptyState);
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            // 按状态排序：待处理订单在前
+            const sortedOrders = [...orders].sort((a, b) => {
+                if (a.status === 'pending' && b.status === 'completed') return -1;
+                if (a.status === 'completed' && b.status === 'pending') return 1;
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+            
+            orderList.innerHTML = '';
+            
+            sortedOrders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = `order-card ${order.status}`;
+                
+                const statusText = order.status === 'pending' ? '待录入' : '已完成';
+                const statusClass = order.status === 'pending' ? 'status-pending' : 'status-completed';
+                const buttonText = order.status === 'pending' ? '标记完成' : '标记待录';
+                const buttonClass = order.status === 'pending' ? 'btn-complete' : 'btn-pending';
+                
+                orderCard.innerHTML = `
+                    <div class="order-header">
+                        <div class="order-status ${statusClass}">${statusText}</div>
+                    </div>
+                    <div class="order-details">
+                        ${order.details}
+                    </div>
+                    <div class="order-actions">
+                        <button class="${buttonClass}" onclick="toggleOrderStatus('${order.id}')">
+                            ${buttonText}
+                        </button>
+                        <button class="btn-delete" onclick="deleteOrder('${order.id}')">删除</button>
+                    </div>
+                    <div class="order-time">
+                        ${formatDate(order.createdAt)}
+                    </div>
+                `;
+                
+                orderList.appendChild(orderCard);
+            });
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            const pendingOrders = orders.filter(o => o.status === 'pending').length;
+            const completedOrders = orders.filter(o => o.status === 'completed').length;
+            
+            pendingCount.textContent = pendingOrders;
+            completedCount.textContent = completedOrders;
+            
+            // 如果没有订单，隐藏一键删除按钮
+            if (orders.length === 0) {
+                deleteAllBtn.style.display = 'none';
+            } else {
+                deleteAllBtn.style.display = 'block';
+            }
+        }
+        
+        // 保存订单到本地存储
+        function saveOrders() {
+            localStorage.setItem('orders', JSON.stringify(orders));
+        }
+        
+        // 辅助函数：格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // 显示通知
+        function showNotification(message) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--success-color);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                font-weight: 500;
+                transition: all 0.3s;
+                transform: translateX(100%);
+                opacity: 0;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // 显示通知
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+                notification.style.opacity = '1';
+            }, 100);
+            
+            // 隐藏通知
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
